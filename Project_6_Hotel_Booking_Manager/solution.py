@@ -3,105 +3,105 @@
 # LỜI GIẢI HOÀN CHỈNH / FULL SOLUTION
 # ==============================================================================
 
-def lay_gia_phong(loai_phong):
-    """Lấy đơn giá phòng theo đêm. Trả về -1 nếu loại phòng không hợp lệ."""
-    loai_phong = loai_phong.upper().strip()
-    bang_gia = {
+def get_room_price(room_type):
+    """Get nightly room rate. Returns -1 if invalid."""
+    room_type = room_type.upper().strip()
+    price_table = {
         "STANDARD": 500000,
         "DELUXE": 900000,
         "SUITE": 1600000,
         "VIP": 2500000
     }
-    return bang_gia.get(loai_phong, -1)
+    return price_table.get(room_type, -1)
 
-def tinh_tien_phong(don_gia_phong, so_dem, la_ngay_le=False):
-    """Tính tiền phòng cơ bản có tính thêm phụ thu nếu vào dịp lễ Tết."""
-    tien_goc = don_gia_phong * so_dem
-    if la_ngay_le:
-        return round(tien_goc * 1.25, 2)
-    return round(tien_goc, 2)
+def calculate_room_cost(room_price, nights, is_holiday=False):
+    """Calculate base room cost with optional holiday surcharge."""
+    base_cost = room_price * nights
+    if is_holiday:
+        return round(base_cost * 1.25, 2)
+    return round(base_cost, 2)
 
-def tinh_tien_dich_vu(so_nguoi, so_bua_buffet=0, don_san_bay=False, giat_ui=False):
-    """Tính tổng chi phí các dịch vụ bổ sung dựa trên lựa chọn của khách."""
-    gia_buffet_don = 120000
-    gia_don_san_bay = 350000
-    gia_giat_ui = 150000
+def calculate_service_cost(guests_count, buffet_meals=0, airport_pickup=False, laundry=False):
+    """Calculate total add-on service cost."""
+    buffet_rate = 120000
+    pickup_rate = 350000
+    laundry_rate = 150000
     
-    tien_buffet = so_nguoi * so_bua_buffet * gia_buffet_don
-    tien_xe = gia_don_san_bay if don_san_bay else 0
-    tien_giat = gia_giat_ui if giat_ui else 0
+    buffet_cost = guests_count * buffet_meals * buffet_rate
+    pickup_cost = pickup_rate if airport_pickup else 0
+    laundry_cost = laundry_rate if laundry else 0
     
-    return tien_buffet + tien_xe + tien_giat
+    return buffet_cost + pickup_cost + laundry_cost
 
-def tinh_giam_gia_thanh_vien(tong_chi_phi, hang_the="STANDARD"):
-    """Tính mức giảm giá dựa trên cấp bậc thành viên loyalty."""
-    hang_the = hang_the.upper().strip()
-    if hang_the == "PLATINUM":
-        ti_le = 0.15
-    elif hang_the == "GOLD":
-        ti_le = 0.10
-    elif hang_the == "SILVER":
-        ti_le = 0.05
+def calculate_membership_discount(subtotal, membership_tier="STANDARD"):
+    """Calculate loyalty membership discount."""
+    membership_tier = membership_tier.upper().strip()
+    if membership_tier == "PLATINUM":
+        rate = 0.15
+    elif membership_tier == "GOLD":
+        rate = 0.10
+    elif membership_tier == "SILVER":
+        rate = 0.05
     else:
-        ti_le = 0.0
+        rate = 0.0
         
-    return round(tong_chi_phi * ti_le, 2)
+    return round(subtotal * rate, 2)
 
-def in_hoa_don_khach_san(ten_khach, loai_phong, so_dem, tien_phong, tien_dv, giam_gia, vat, tong_cong):
-    """In hóa đơn chi tiết khách sạn."""
+def print_hotel_invoice(guest_name, room_type, nights, room_cost, service_cost, discount, vat, final_total):
+    """Print formatted hotel invoice."""
     print("\n" + "=" * 55)
-    print(f"{'HÓA ĐƠN ĐẶT PHÒNG KHÁCH SẠN':^55}")
+    print(f"{'HOTEL BOOKING INVOICE / HÓA ĐƠN KHÁCH SẠN':^55}")
     print("=" * 55)
-    print(f" Khách hàng: {ten_khach}")
-    print(f" Loại phòng: {loai_phong.upper()} ({so_dem} đêm)")
+    print(f" Guest / Khách hàng: {guest_name}")
+    print(f" Room / Loại phòng:  {room_type.upper()} ({nights} nights / đêm)")
     print("-" * 55)
-    print(f" [+] Tiền phòng:                {tien_phong:>15,.0f} VND")
-    print(f" [+] Dịch vụ bổ sung:           {tien_dv:>15,.0f} VND")
-    print(f" [-] Giảm giá thành viên:       {giam_gia:>15,.0f} VND")
-    print(f" [+] Thuế VAT & Phí DV (8%):    {vat:>15,.0f} VND")
+    print(f" [+] Room Cost / Tiền phòng:      {room_cost:>15,.0f} VND")
+    print(f" [+] Services / Dịch vụ kèm theo: {service_cost:>15,.0f} VND")
+    print(f" [-] Loyalty Discount / Giảm giá: {discount:>15,.0f} VND")
+    print(f" [+] VAT Tax (8%) / Thuế VAT:     {vat:>15,.0f} VND")
     print("=" * 55)
-    print(f" [★] TỔNG CỘNG THANH TOÁN:      {tong_cong:>15,.0f} VND")
+    print(f" [★] FINAL TOTAL / TỔNG THANH TOÁN:{final_total:>15,.0f} VND")
     print("=" * 55 + "\n")
 
 def main():
-    print("=== HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN / HOTEL BOOKING ===")
+    print("=== HOTEL BOOKING & SERVICE MANAGER ===")
     
-    ten_khach = input("Nhập tên khách hàng: ")
-    loai_phong = input("Chọn loại phòng (STANDARD / DELUXE / SUITE / VIP): ")
+    guest_name = input("Enter guest name / Nhập tên khách: ")
+    room_type = input("Choose room type / Loại phòng (STANDARD / DELUXE / SUITE / VIP): ")
     
-    don_gia = lay_gia_phong(loai_phong)
-    if don_gia == -1:
-        print("❌ Lỗi: Loại phòng bạn nhập không tồn tại trong hệ thống!")
+    room_price = get_room_price(room_type)
+    if room_price == -1:
+        print("❌ Error: Invalid room type! / Loại phòng không tồn tại!")
         return
     
-    so_dem = int(input("Nhập số đêm lưu trú: "))
-    so_nguoi = int(input("Nhập số lượng khách ở: "))
+    nights = int(input("Enter number of nights / Số đêm ở: "))
+    guests_count = int(input("Enter number of guests / Số khách: "))
     
-    la_le_input = input("Có phải thời gian ngày lễ/Tết không? (y/n): ").strip().lower()
-    la_ngay_le = (la_le_input == "y" or la_le_input == "yes")
+    holiday_input = input("Is it a holiday? / Dịp lễ không? (y/n): ").strip().lower()
+    is_holiday = (holiday_input == "y" or holiday_input == "yes")
     
-    print("\n--- Dịch vụ bổ sung ---")
-    so_bua_buffet = int(input("Số bữa ăn sáng Buffet đăng ký: "))
-    don_sb_input = input("Đăng ký xe đón sân bay không? (y/n): ").strip().lower()
-    don_san_bay = (don_sb_input == "y" or don_sb_input == "yes")
+    print("\n--- Add-on Services / Dịch vụ bổ sung ---")
+    buffet_meals = int(input("Breakfast buffet count / Số bữa buffet: "))
+    pickup_input = input("Airport pickup / Đón sân bay? (y/n): ").strip().lower()
+    airport_pickup = (pickup_input == "y" or pickup_input == "yes")
     
-    giat_ui_input = input("Đăng ký gói giặt ủi đồ không? (y/n): ").strip().lower()
-    giat_ui = (giat_ui_input == "y" or giat_ui_input == "yes")
+    laundry_input = input("Laundry package / Giặt ủi? (y/n): ").strip().lower()
+    laundry = (laundry_input == "y" or laundry_input == "yes")
     
-    hang_the = input("Hạng thẻ thành viên (STANDARD / SILVER / GOLD / PLATINUM): ")
+    membership_tier = input("Membership tier / Hạng thẻ (STANDARD / SILVER / GOLD / PLATINUM): ")
     
-    # Tính toán
-    tien_phong = tinh_tien_phong(don_gia, so_dem, la_ngay_le)
-    tien_dv = tinh_tien_dich_vu(so_nguoi, so_bua_buffet, don_san_bay, giat_ui)
-    tong_tam_tinh = tien_phong + tien_dv
+    # Calculations
+    room_cost = calculate_room_cost(room_price, nights, is_holiday)
+    service_cost = calculate_service_cost(guests_count, buffet_meals, airport_pickup, laundry)
+    subtotal = room_cost + service_cost
     
-    giam_gia = tinh_giam_gia_thanh_vien(tong_tam_tinh, hang_the)
-    sau_giam = tong_tam_tinh - giam_gia
+    discount = calculate_membership_discount(subtotal, membership_tier)
+    after_discount = subtotal - discount
     
-    vat = round(sau_giam * 0.08, 2)
-    tong_cong = sau_giam + vat
+    vat = round(after_discount * 0.08, 2)
+    final_total = after_discount + vat
     
-    in_hoa_don_khach_san(ten_khach, loai_phong, so_dem, tien_phong, tien_dv, giam_gia, vat, tong_cong)
+    print_hotel_invoice(guest_name, room_type, nights, room_cost, service_cost, discount, vat, final_total)
 
 if __name__ == "__main__":
     main()

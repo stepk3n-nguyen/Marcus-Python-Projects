@@ -3,133 +3,127 @@
 # LỜI GIẢI HOÀN CHỈNH / FULL SOLUTION
 # ==============================================================================
 
-def tinh_lai_tiet_kiem(tien_gui, ky_han_thang, loai_lai="DON"):
+def calculate_savings_interest(deposit_amount, months, interest_type="SIMPLE"):
     """
-    Tính tiền lãi tiết kiệm (Lãi đơn hoặc Lãi kép).
-    Trả về: (tien_lai, tong_nhan)
+    Calculate savings interest return (Simple or Monthly Compounded).
+    Returns: (interest, total_payout)
     """
-    if ky_han_thang < 6:
-        lai_suat_nam = 4.5
-    elif ky_han_thang < 12:
-        lai_suat_nam = 5.5
+    if months < 6:
+        annual_rate = 4.5
+    elif months < 12:
+        annual_rate = 5.5
     else:
-        lai_suat_nam = 6.8
+        annual_rate = 6.8
 
-    r = lai_suat_nam / 100
+    r = annual_rate / 100
 
-    loai_lai = loai_lai.upper().strip()
-    if loai_lai == "KEP":
-        # Lãi kép tính gộp lãi theo từng tháng
-        tong_nhan = tien_gui * ((1 + r / 12) ** ky_han_thang)
-        tien_lai = tong_nhan - tien_gui
+    interest_type = interest_type.upper().strip()
+    if interest_type == "COMPOUND":
+        total_payout = deposit_amount * ((1 + r / 12) ** months)
+        interest = total_payout - deposit_amount
     else:
-        # Lãi đơn
-        tien_lai = tien_gui * r * (ky_han_thang / 12)
-        tong_nhan = tien_gui + tien_lai
+        interest = deposit_amount * r * (months / 12)
+        total_payout = deposit_amount + interest
 
-    return round(tien_lai, 2), round(tong_nhan, 2)
+    return round(interest, 2), round(total_payout, 2)
 
-def kiem_tra_du_dieu_kien_vay(thu_nhap_thang, so_tien_tra_hang_thang, co_no_xau=False):
+def check_loan_eligibility(monthly_income, monthly_payment, has_bad_debt=False):
     """
-    Thẩm định điều kiện duyệt hồ sơ vay vốn ngân hàng.
-    Trả về: (duoc_duyet: bool, ly_do: str)
+    Check loan approval eligibility based on credit history and DTI ratio.
+    Returns: (is_approved: bool, message: str)
     """
-    if co_no_xau:
-        return False, "Hồ sơ bị từ chối do khách hàng có lịch sử nợ xấu (CIC)."
+    if has_bad_debt:
+        return False, "Loan rejected: Bad credit record found on CIC / Từ chối do có nợ xấu."
 
-    if thu_nhap_thang <= 0:
-        return False, "Thu nhập hàng tháng không hợp lệ."
+    if monthly_income <= 0:
+        return False, "Invalid monthly income / Thu nhập không hợp lệ."
 
-    dti = so_tien_tra_hang_thang / thu_nhap_thang
-    if dti <= 0.60:
-        return True, f"Hồ sơ đủ điều kiện! Tỷ lệ trả góp trên thu nhập (DTI): {dti*100:.1f}% <= 60%."
+    dti_ratio = monthly_payment / monthly_income
+    if dti_ratio <= 0.60:
+        return True, f"Loan approved! DTI ratio: {dti_ratio*100:.1f}% <= 60% / Đủ điều kiện duyệt vay."
     else:
-        return False, f"Hồ sơ bị từ chối vì tỷ lệ DTI ({dti*100:.1f}%) vượt quá ngưỡng an toàn 60%."
+        return False, f"Loan rejected: DTI ratio ({dti_ratio*100:.1f}%) exceeds safety limit 60% / Khoản trả vượt 60% thu nhập."
 
-def tinh_tra_gop_emi(so_tien_vay, lai_suat_nam, so_thang):
+def calculate_loan_emi(loan_amount, annual_rate, months):
     """
-    Tính số tiền trả góp hàng tháng theo công thức Niên kim / EMI cố định.
-    Trả về: (emi_thang, tong_tra, tong_lai)
+    Calculate fixed Equated Monthly Installment (EMI).
+    Returns: (monthly_emi, total_payment, total_interest)
     """
-    r_thang = (lai_suat_nam / 100) / 12
+    r_month = (annual_rate / 100) / 12
 
-    if r_thang == 0:
-        emi = so_tien_vay / so_thang
+    if r_month == 0:
+        emi = loan_amount / months
     else:
-        # Công thức: EMI = P * [r(1+r)^n] / [(1+r)^n - 1]
-        he_so = (1 + r_thang) ** so_thang
-        emi = so_tien_vay * (r_thang * he_so) / (he_so - 1)
+        factor = (1 + r_month) ** months
+        emi = loan_amount * (r_month * factor) / (factor - 1)
 
-    tong_tra = emi * so_thang
-    tong_lai = tong_tra - so_tien_vay
+    total_payment = emi * months
+    total_interest = total_payment - loan_amount
 
-    return round(emi, 2), round(tong_tra, 2), round(tong_lai, 2)
+    return round(emi, 2), round(total_payment, 2), round(total_interest, 2)
 
-def in_bang_tra_gop(so_tien_vay, emi_thang, tong_tra, tong_lai, so_thang):
-    """In thông tin chi tiết bảng tính vay trả góp."""
+def print_loan_schedule(loan_amount, monthly_emi, total_payment, total_interest, months):
+    """Print formatted loan schedule."""
     print("\n" + "=" * 55)
-    print(f"{'KẾ HOẠCH TRẢ GÓP NGÂN HÀNG (EMI)':^55}")
+    print(f"{'LOAN REPAYMENT SCHEDULE / KẾ HOẠCH TRẢ GÓP (EMI)':^55}")
     print("=" * 55)
-    print(f" Số tiền vay gốc:               {so_tien_vay:>15,.0f} VND")
-    print(f" Thời hạn vay:                  {so_thang:>15} tháng")
+    print(f" Principal Loan / Tiền vay gốc: {loan_amount:>15,.0f} VND")
+    print(f" Term / Kỳ hạn vay:              {months:>15} months / tháng")
     print("-" * 55)
-    print(f" [★] Tiền trả góp mỗi tháng:     {emi_thang:>15,.0f} VND")
-    print(f" [+] Tổng tiền lãi trong kỳ:    {tong_lai:>15,.0f} VND")
-    print(f" [=] Tổng cả gốc + lãi phải trả:{tong_tra:>15,.0f} VND")
+    print(f" [★] Monthly EMI / Trả mỗi tháng:{monthly_emi:>15,.0f} VND")
+    print(f" [+] Total Interest / Tổng lãi:  {total_interest:>15,.0f} VND")
+    print(f" [=] Total Payout / Tổng gốc+lãi:{total_payment:>15,.0f} VND")
     print("=" * 55 + "\n")
 
 def main():
     while True:
-        print("\n" + "=" * 50)
-        print("   CHƯƠNG TRÌNH HOẠCH ĐỊNH TÀI CHÍNH NGÂN HÀNG")
-        print("=" * 50)
-        print(" 1. Tính lãi suất gửi tiết kiệm (Đơn / Kép)")
-        print(" 2. Thẩm định & Tính lịch vay trả góp (EMI)")
-        print(" 3. Thoát chương trình")
-        print("-" * 50)
-        chon = input("Vui lòng chọn chức năng (1-3): ").strip()
+        print("\n" + "=" * 52)
+        print("   BANK FINANCIAL PLANNER / HOẠCH ĐỊNH TÀI CHÍNH")
+        print("=" * 52)
+        print(" 1. Calculate Savings Interest / Tính lãi tiết kiệm")
+        print(" 2. Loan Approval & EMI Schedule / Tính vay trả góp")
+        print(" 3. Exit / Thoát")
+        print("-" * 52)
+        choice = input("Select an option / Chọn chức năng (1-3): ").strip()
 
-        if chon == "1":
-            print("\n--- TÍNH TIỀN GỬI TIẾT KIỆM ---")
-            tien_gui = float(input("Nhập số tiền muốn gửi (VND): "))
-            ky_han = int(input("Nhập kỳ hạn gửi (số tháng): "))
-            loai_lai = input("Chọn loại lãi (DON: Lãi đơn / KEP: Lãi kép hàng tháng): ")
+        if choice == "1":
+            print("\n--- SAVINGS INTEREST CALCULATOR ---")
+            deposit = float(input("Enter deposit amount / Tiền gửi (VND): "))
+            months = int(input("Enter term in months / Kỳ hạn (tháng): "))
+            interest_type = input("Interest type (SIMPLE: Lãi đơn / COMPOUND: Lãi kép): ")
 
-            tien_lai, tong_nhan = tinh_lai_tiet_kiem(tien_gui, ky_han, loai_lai)
-            print("-" * 45)
-            print(f" Tiền lãi nhận được:  {tien_lai:>15,.0f} VND")
-            print(f" Tổng tiền rút về:    {tong_nhan:>15,.0f} VND")
-            print("-" * 45)
+            interest, total = calculate_savings_interest(deposit, months, interest_type)
+            print("-" * 48)
+            print(f" Interest earned / Tiền lãi:   {interest:>15,.0f} VND")
+            print(f" Total payout / Tổng rút về:    {total:>15,.0f} VND")
+            print("-" * 48)
 
-        elif chon == "2":
-            print("\n--- THẨM ĐỊNH & TÍNH VAY TRẢ GÓP ---")
-            thu_nhap = float(input("Nhập thu nhập thực lĩnh hàng tháng (VND): "))
-            tien_vay = float(input("Nhập số tiền muốn vay (VND): "))
-            lai_suat = float(input("Nhập lãi suất vay (%/năm): "))
-            so_thang = int(input("Nhập thời hạn vay (tháng): "))
+        elif choice == "2":
+            print("\n--- LOAN APPRAISAL & EMI CALCULATOR ---")
+            income = float(input("Enter monthly net income / Thu nhập tháng (VND): "))
+            loan_amount = float(input("Enter desired loan / Số tiền vay (VND): "))
+            rate = float(input("Enter annual interest rate / Lãi suất năm (%): "))
+            months = int(input("Enter loan term / Số tháng vay: "))
             
-            no_xau_input = input("Có từng có lịch sử nợ xấu ngân hàng không? (y/n): ").strip().lower()
-            co_no_xau = (no_xau_input == "y" or no_xau_input == "yes")
+            bad_debt_input = input("Any bad credit history? / Có nợ xấu không? (y/n): ").strip().lower()
+            has_bad_debt = (bad_debt_input == "y" or bad_debt_input == "yes")
 
-            # Tính thử số tiền trả góp hàng tháng
-            emi, tong_tra, tong_lai = tinh_tra_gop_emi(tien_vay, lai_suat, so_thang)
+            emi, total_pay, total_int = calculate_loan_emi(loan_amount, rate, months)
+            is_approved, msg = check_loan_eligibility(income, emi, has_bad_debt)
 
-            # Thẩm định hồ sơ
-            duoc_duyet, thong_diep = kiem_tra_du_dieu_kien_vay(thu_nhap, emi, co_no_xau)
-
-            print("\n" + ">" * 15 + " KẾT QUẢ THẨM ĐỊNH " + "<" * 15)
-            if duoc_duyet:
-                print(f"✅ {thong_diep}")
-                in_bang_tra_gop(tien_vay, emi, tong_tra, tong_lai, so_thang)
+            print("\n" + ">" * 15 + " APPRAISAL RESULT " + "<" * 15)
+            if is_approved:
+                print(f"✅ {msg}")
+                print_loan_schedule(loan_amount, emi, total_pay, total_int, months)
             else:
-                print(f"❌ {thong_diep}")
-                print(f"   (Khoản trả góp dự kiến là {emi:,.0f} VND/tháng so với thu nhập {thu_nhap:,.0f} VND)")
+                print(f"❌ {msg}")
+                print(f"   (Monthly EMI is {emi:,.0f} VND/month compared to income {income:,.0f} VND)")
 
-        elif chon == "3":
-            print("Cảm ơn bạn đã sử dụng dịch vụ tài chính. Tạm biệt!")
+        elif choice == "3":
+            print("Thank you for using our financial services. Goodbye!")
             break
         else:
-            print("Lựa chọn không hợp lệ. Vui lòng nhập từ 1 đến 3.")
+            print("Invalid choice. Please select 1, 2, or 3.")
 
 if __name__ == "__main__":
     main()
