@@ -8,3 +8,8 @@ __pycache__/
 .idea/
 *.swp
 *.rar
+
+# Specific untracked files
+main.py
+for-loop.py
+
