@@ -709,3 +709,12 @@ print(f"5. Final roster sorted alphabetically (A-Z): {students}\n")
 print("=" * 70)
 print("            ALL 10 EXERCISES COMPLETED SUCCESSFULLY!")
 print("=" * 70)
+
+#---------------------------------------------------------------------
+
+n = int(input("Nhập số lượng phần tử: "))
+numbers = []
+for i in range(n):
+    num = int(input(f"Nhập phần tử thứ {i + 1}: "))
+    numbers.append(num)
+print("Danh sách vừa nhập:", numbers)
