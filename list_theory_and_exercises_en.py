@@ -718,3 +718,22 @@ for i in range(n):
     num = int(input(f"Nhập phần tử thứ {i + 1}: "))
     numbers.append(num)
 print("Danh sách vừa nhập:", numbers)
+
+
+
+
+#------------------------------------------
+'''
+Write a Python program that prompts the user to enter the number of elements $n$ and the values of each element in a list. The program should compute and display:
+
+The sum of all elements in the list.
+The average (arithmetic mean) of the elements in the list.
+Sample Input:
+5
+10 20 30 40 50
+
+Sample Output:
+Sum: 150
+Average: 30.0
+
+'''
